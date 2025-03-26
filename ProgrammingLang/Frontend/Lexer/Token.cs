@@ -15,6 +15,7 @@ public enum TokenTypes
 	Equals,
 	
 	Let,
+	Type,
 	
 	OpenBracket,
 	CloseBracket,

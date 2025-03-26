@@ -1,3 +1,4 @@
+using ProgrammingLang.Runtime;
 using System.Collections;
 using System.Text.Json;
 using System.Text.Json.Nodes;
@@ -67,9 +68,12 @@ public class Lexer
 
 						//check keywords
 						bool isKeyword = Keywords.KeywordsDic.TryGetValue(identifier, out TokenTypes type);
+						bool isType = Types.TypesDict.ContainsKey(identifier);
 						
 						if (isKeyword || type == TokenTypes.Number)
 							tokens.Add(new Token(identifier, type));
+						else if (isType)
+							tokens.Add(new Token(identifier, TokenTypes.Type));
 						else
 							tokens.Add(new Token(identifier, TokenTypes.Identifier));
 					} else if (IsSkippable(sourceSplit[0])) {
@@ -91,7 +95,7 @@ public class Lexer
 	
 	private static bool IsAlphabetic(string src)
 	{
-		return !src.Equals(src.ToUpper());
+		return !src.Equals(src.ToUpper()) || !src.Equals(src.ToLower());
 	}
 	
 	private static bool IsNumeric(string src)

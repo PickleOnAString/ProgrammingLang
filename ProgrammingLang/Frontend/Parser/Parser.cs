@@ -1,29 +1,31 @@
-using ProgrammingLang.AST;
+using ProgrammingLang.Frontend.AST;
+using ProgrammingLang.Frontend.AST.Nodes;
 using ProgrammingLang.Lexer;
-namespace ProgrammingLang.Parser;
+using ProgrammingLang.Runtime;
+namespace ProgrammingLang.Frontend.Parser;
 
 public class Parser
 {
 	List<Token> _tokens = [];
 
-	public Program ProduceAst(string source)
+	public ProgramNode ProduceAst(string source)
 	{
 		_tokens = Lexer.Lexer.Tokenize(source).ToList();
-		Program program = new Program([]);
+		ProgramNode programNode = new ProgramNode([]);
 		
 		while (!IsAtEnd())
 		{
-			program.Statements.Add(ParseStatement());
+			programNode.Statements.Add(ParseStatement());
 		}
 		
-		return program;
+		return programNode;
 	}
 
 	private IStatement ParseStatement()
 	{
 		switch (_tokens[0].Type)
 		{
-			case TokenTypes.Let:
+			case TokenTypes.Type:
 				return ParseVariableDeclarationStatement();
 			default:
 				return ParseExpression();
@@ -32,19 +34,19 @@ public class Parser
 
 	private IStatement ParseVariableDeclarationStatement()
 	{
-		Advance();
+		String type = Advance().Value;
 		string identifier = AdvanceExpect(TokenTypes.Identifier, "Expected identifier following 'let' keyword.").Value;
 		if (_tokens[0].Type == TokenTypes.Semicolon)
 		{
 			Advance();
-			return new VariableDeclaration(identifier);
+			return new VariableDeclarationNode(identifier, Types.TypesDict[type]);
 		}
 
 		AdvanceExpect(TokenTypes.Equals, "Expected '=' or ';' after variable declaration.");
-		VariableDeclaration variableDeclaration = new VariableDeclaration(identifier, ParseExpression());
+		VariableDeclarationNode variableDeclarationNode = new VariableDeclarationNode(identifier, Types.TypesDict[type], ParseExpression());
 		
 		AdvanceExpect(TokenTypes.Semicolon, "Expected ';' after variable declaration.");
-		return variableDeclaration;
+		return variableDeclarationNode;
 	}
 
 	private IExpression ParseExpression()
@@ -60,7 +62,7 @@ public class Parser
 		{
 			string op = Advance().Value;
 			IExpression right = ParseMultiplicationExpression();
-			left = new BinaryExpression(left, right, op);
+			left = new BinaryExpressionNode(left, right, op);
 		}
 		
 		return left;
@@ -74,7 +76,7 @@ public class Parser
 		{
 			string op = Advance().Value;
 			IExpression right = ParsePrimaryExpression();
-			left = new BinaryExpression(left, right, op);
+			left = new BinaryExpressionNode(left, right, op);
 		}
 		
 		return left;
@@ -87,9 +89,9 @@ public class Parser
 		switch (tk.Type)
 		{
 			case TokenTypes.Identifier:
-				return new Identifier(Advance().Value);
+				return new IdentifierNode(Advance().Value);
 			case TokenTypes.Number:
-				return new NumericalLiteral(float.Parse(Advance().Value));
+				return new NumericalLiteralNode(float.Parse(Advance().Value));
 			case TokenTypes.OpenBracket:
 				Advance();
 				IExpression expr = ParseExpression();
