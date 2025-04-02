@@ -2,7 +2,7 @@ using ProgrammingLang.Runtime;
 using Environment = ProgrammingLang.Runtime.Environment;
 namespace ProgrammingLang.Frontend.AST.Nodes;
 
-public class NewExpressionNode(string className, IExpression[] args) : IExpression
+public class NewExpressionNode(IExpression className, IExpression[] args) : IExpression
 {
 
 	public IRuntimeValue Evaluate(Environment env)
@@ -14,6 +14,9 @@ public class NewExpressionNode(string className, IExpression[] args) : IExpressi
 			runtimeArgs[i] = Interpreter.Evaluate(expression, env);
 			i++;
 		}
-		return env.LookupType(className, env).Instantiate(runtimeArgs);
+		IRuntimeValue evaluatedClass = className.Evaluate(env);
+		if (evaluatedClass is not IRuntimeType type)
+			throw new Exception("NewExpression: can't instantiate a variable. expected a type, found " + evaluatedClass.GetType().Name);
+		return type.Instantiate(runtimeArgs);
 	}
 }

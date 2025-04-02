@@ -10,7 +10,7 @@ public static class Types
 	}
 }
 
-public interface IRuntimeType
+public interface IRuntimeType : IRuntimeValue
 {
 	public string Name { get; }
 	public bool CanCast(IRuntimeValue value);
@@ -22,6 +22,13 @@ public class RuntimeFloatType : IRuntimeType
 {
 	public string Name => "Float";
 	public Environment? StaticEnv { get; set; } = null;
+	public IRuntimeType Type { get; set; }
+
+	public RuntimeFloatType()
+	{
+		Type = this;
+	}
+	
 	public bool CanCast(IRuntimeValue value)
 	{
 		return value.GetType() == typeof(NumberValue);
@@ -37,6 +44,13 @@ public class RuntimeNullType : IRuntimeType
 {
 	public string Name => "Null";
 	public Environment? StaticEnv { get; set; } = null;
+	public IRuntimeType Type { get; set; }
+
+	public RuntimeNullType()
+	{
+		Type = this;
+	}
+	
 	public bool CanCast(IRuntimeValue value)
 	{
 		return value.GetType() == typeof(NullValue);
@@ -52,6 +66,13 @@ public class RuntimeBoolType : IRuntimeType
 {
 	public string Name => "Bool";
 	public Environment? StaticEnv { get; set; } = null;
+	public IRuntimeType Type { get; set; }
+
+	public RuntimeBoolType()
+	{
+		Type = this;
+	}
+	
 	public bool CanCast(IRuntimeValue value)
 	{
 		return value.GetType() == typeof(BoolValue);
@@ -66,7 +87,7 @@ public class RuntimeBoolType : IRuntimeType
 public class RuntimeClasType(string name, string? superClass, Environment env, Environment staticEnv) : IRuntimeType
 {
 	public string Name => name;
-	public Environment? StaticEnv { get; set; } = null;
+	public Environment StaticEnv { get; set; } = staticEnv;
 
 	public bool CanCast(IRuntimeValue value)
 	{
@@ -76,5 +97,16 @@ public class RuntimeClasType(string name, string? superClass, Environment env, E
 	public IRuntimeValue Instantiate(IRuntimeValue[] args)
 	{
 		return new ClassValue(name, superClass, env, this);
+	}
+	public IRuntimeType Type
+	{
+		get
+		{
+			return this;
+		}
+		set
+		{
+			throw new Exception("Can't set type of class");
+		}
 	}
 }

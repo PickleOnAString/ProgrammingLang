@@ -11,12 +11,18 @@ public class ClassDeclarationNode(string name, List<IStatement> statements, Acce
 	
 	public IRuntimeValue Evaluate(Environment env)
 	{
-		Environment classEnv = new Environment(ScopeType.Class, env);
-		Environment staticEnvironment = new Environment(ScopeType.Static);
+		Environment classEnv = new Environment(ScopeType.Class, env.ScopeType == ScopeType.Class ? env.StaticEnv : env);
+		Environment staticEnvironment = new Environment(ScopeType.Static, env.ScopeType == ScopeType.Class ? env.StaticEnv : env);
+		classEnv.StaticEnv = staticEnvironment;
 		foreach (IStatement statement in Statements)
 			Interpreter.Evaluate(statement, classEnv);
 		AcMod ??= AccessModifier.Private;
-		env.DeclareType(Name, new RuntimeClasType(Name, SuperClass, classEnv, staticEnvironment), (AccessModifier)AcMod);
+		if (env.ScopeType == ScopeType.Global)
+			env.DeclareType(Name, new RuntimeClasType(Name, SuperClass, classEnv, staticEnvironment), (AccessModifier)AcMod);
+		else if (env.ScopeType == ScopeType.Class)
+			env.StaticEnv.DeclareType(Name, new RuntimeClasType(Name, SuperClass, classEnv, staticEnvironment), (AccessModifier)AcMod);
+		else
+			throw new Exception("Class declaration can only be used in global or class scope");
 		return new NullValue();
 	}
 }

@@ -33,6 +33,8 @@ public enum TokenTypes
 	Public,
 	Protected,
 	
+	Static,
+	
 	EOF
 }
 
@@ -48,7 +50,8 @@ public static class Keywords
 			{"new", TokenTypes.New},
 			{"private", TokenTypes.Private},
 			{"public", TokenTypes.Public},
-			{"protected", TokenTypes.Protected}
+			{"protected", TokenTypes.Protected},
+			{"static", TokenTypes.Static}
 		};
 	}
 }

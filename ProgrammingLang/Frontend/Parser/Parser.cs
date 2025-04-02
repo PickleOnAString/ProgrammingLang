@@ -15,7 +15,7 @@ public class Parser
 		
 		while (!IsAtEnd())
 		{
-			programNode.Statements.Add(ParseStatement());
+			programNode.Statements.Add(ParseModifiers());
 		}
 		
 		return programNode;
@@ -28,36 +28,39 @@ public class Parser
 		
 		while (!IsAtEnd())
 		{
-			statements.Add(ParseAccessModifier());
+			statements.Add(ParseModifiers());
 		}
 		
 		return statements;
 	}
 
-	private IStatement ParseAccessModifier()
+	private IStatement ParseModifiers(AccessModifier? accessModifier = null, bool isStatic = false)
 	{
 		switch (_tokens[0].Type)
 		{
 			case TokenTypes.Private:
 				Advance();
-				return ParseStatement(AccessModifier.Private);
+				return ParseModifiers(AccessModifier.Private);
 			case TokenTypes.Public:
 				Advance();
-				return ParseStatement(AccessModifier.Public);
+				return ParseModifiers(AccessModifier.Public);
 			case TokenTypes.Protected:
 				Advance();
-				return ParseStatement(AccessModifier.Protected);
+				return ParseModifiers(AccessModifier.Protected);
+			case TokenTypes.Static:
+				Advance();
+				return ParseModifiers(accessModifier, true);
 			default:
-				return ParseStatement();
+				return ParseStatement(accessModifier, isStatic);
 		}
 	}
 
-	private IStatement ParseStatement(AccessModifier? accessModifier = null)
+	private IStatement ParseStatement(AccessModifier? accessModifier, bool isStatic)
 	{
 		switch (_tokens[0].Type)
 		{
 			case TokenTypes.Identifier:
-				return ParseVariableDeclarationStatement(accessModifier);
+				return ParseVariableDeclarationStatement(accessModifier, isStatic);
 			case TokenTypes.Class:
 				return ParseClassDeclarationStatement(accessModifier);
 			default:
@@ -65,7 +68,7 @@ public class Parser
 		}
 	}
 
-	private IStatement ParseClassDeclarationStatement(AccessModifier? accessModifier = null)
+	private IStatement ParseClassDeclarationStatement(AccessModifier? accessModifier)
 	{
 		// Consume 'class' token
 		Advance();
@@ -81,7 +84,7 @@ public class Parser
 		
 		AdvanceExpect(TokenTypes.OpenCurlyBracket, "Expected open curly bracket after class name.");
 
-		List<Token> classBody = new List<Token>();
+		List<Token> classBody = [];
 		int bracketDepth = 1;
 
 		while (bracketDepth > 0 && _tokens[0].Type != TokenTypes.EOF)
@@ -111,7 +114,7 @@ public class Parser
 		return new ClassDeclarationNode(name, classStatements, accessModifier, superClass);
 	}
 
-	private IStatement ParseVariableDeclarationStatement(AccessModifier? accessModifier = null)
+	private IStatement ParseVariableDeclarationStatement(AccessModifier? accessModifier, bool isStatic)
 	{
 		if (_tokens[1].Type == TokenTypes.Identifier)
 		{
@@ -120,11 +123,11 @@ public class Parser
 			if (_tokens[0].Type == TokenTypes.Semicolon)
 			{
 				Advance();
-				return new VariableDeclarationNode(identifier, type, accessModifier);
+				return new VariableDeclarationNode(identifier, type, accessModifier, isStatic);
 			}
 
 			AdvanceExpect(TokenTypes.Equals, "Expected '=' or ';' after variable declaration.");
-			VariableDeclarationNode variableDeclarationNode = new VariableDeclarationNode(identifier, type, accessModifier, ParseExpression());
+			VariableDeclarationNode variableDeclarationNode = new VariableDeclarationNode(identifier, type, accessModifier, isStatic, ParseExpression());
 
 			AdvanceExpect(TokenTypes.Semicolon, "Expected ';' after variable declaration.");
 			return variableDeclarationNode;
@@ -198,8 +201,7 @@ public class Parser
 		while (_tokens[0].Type == TokenTypes.Dot)
 		{
 			Advance();
-			string ident = AdvanceExpect(TokenTypes.Identifier, "Expected identifier after '.'").Value;
-			expr = new MemberExpression(ident, expr);
+			expr = new MemberExpression(ParseExpression(), expr);
 		}
 
 		return expr;
@@ -208,9 +210,10 @@ public class Parser
 	private IExpression ParseNewExpression()
 	{
 		Advance(); // Consume 'new'
+		
     
 		// Expect a class name (identifier)
-		string className = AdvanceExpect(TokenTypes.Identifier, "Expected class name after 'new'.").Value;
+		IExpression className = ParseExpression();
 
 		// Expect '(' for constructor arguments
 		AdvanceExpect(TokenTypes.OpenBracket, "Expected '(' after class name.");

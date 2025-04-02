@@ -2,7 +2,7 @@ using ProgrammingLang.Runtime;
 using Environment = ProgrammingLang.Runtime.Environment;
 namespace ProgrammingLang.Frontend.AST.Nodes;
 
-public class VariableDeclarationNode(String identifier, string type, AccessModifier? accessModifier, IExpression? value = null) : IStatement
+public class VariableDeclarationNode(String identifier, string type, AccessModifier? accessModifier, bool isStatic, IExpression? value = null) : IStatement
 {
 	public string Identifier = identifier;
 	public IExpression? Value = value;
@@ -16,6 +16,10 @@ public class VariableDeclarationNode(String identifier, string type, AccessModif
 		if (!type.CanCast(value))
 			throw new Exception($"Type mismatch: {value.GetType()} is not {Type}");
 		AcMod ??= AccessModifier.Private;
+		if (isStatic && env.ScopeType != ScopeType.Class)
+			throw new Exception("Static variable can only be used in class scope");
+		if (isStatic && env.ScopeType == ScopeType.Class)
+			return env.StaticEnv.DeclareVariable(Identifier, value, (AccessModifier)AcMod);
 		return env.DeclareVariable(Identifier, value, (AccessModifier)AcMod);
 	}
 }

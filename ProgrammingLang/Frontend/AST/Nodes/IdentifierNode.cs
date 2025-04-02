@@ -8,6 +8,20 @@ public class IdentifierNode(string symbol) : IExpression
 	
 	public IRuntimeValue Evaluate(Environment env)
 	{
-		return env.LookupVariable(Symbol, env);
+		try
+		{
+			return env.LookupVariable(Symbol, env);
+		}
+		catch (Exception e)
+		{
+			try
+			{
+				return env.LookupType(Symbol, env);
+			}
+			catch (Exception e2)
+			{
+				throw new Exception($"Identifier: {Symbol} not found");
+			}
+		}
 	}
 }

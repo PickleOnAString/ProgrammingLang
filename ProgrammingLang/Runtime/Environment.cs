@@ -10,6 +10,7 @@ public enum AccessModifier
 public class Environment
 {
     Environment? _parent;
+    public Environment? StaticEnv;
     public Dictionary<string, (IRuntimeValue Value, AccessModifier Modifier)> Variables =
         new Dictionary<string, (IRuntimeValue, AccessModifier)>();
     public Dictionary<string, (IRuntimeType Type, AccessModifier Modifier)> Types =

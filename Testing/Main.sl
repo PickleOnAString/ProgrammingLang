@@ -1,8 +1,12 @@
 class Test {
-    public Float number = 100;
+    public Float number = 500;
     
-    class Foo {
-        Float bar = 1000;
+    public class Foo {
+        Float bar = 2000;
+        
+        public class Bar {
+            private Float ob = 9000;
+        }
     }
 }
 
