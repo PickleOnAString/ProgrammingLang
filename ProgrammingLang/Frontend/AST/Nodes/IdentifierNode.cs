@@ -8,6 +8,6 @@ public class IdentifierNode(string symbol) : IExpression
 	
 	public IRuntimeValue Evaluate(Environment env)
 	{
-		return env.LookupVariable(Symbol);
+		return env.LookupVariable(Symbol, env);
 	}
 }

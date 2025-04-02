@@ -6,4 +6,6 @@ public interface IStatement
 {
 	public IRuntimeValue Evaluate(Environment env);
 }
-public interface IExpression : IStatement { }
+public interface IExpression : IStatement
+{
+}

@@ -27,8 +27,28 @@ public class Lexer
 					tokens.Add(new Token(sourceSplit[0], TokenTypes.CloseBracket));
 					sourceSplit.RemoveAt(0);
 					break;
+				case "}":
+					tokens.Add(new Token(sourceSplit[0], TokenTypes.CloseCurlyBracket));
+					sourceSplit.RemoveAt(0);
+					break;
+				case "{":
+					tokens.Add(new Token(sourceSplit[0], TokenTypes.OpenCurlyBracket));
+					sourceSplit.RemoveAt(0);
+					break;
 				case ";":
 					tokens.Add(new Token(sourceSplit[0], TokenTypes.Semicolon));
+					sourceSplit.RemoveAt(0);
+					break;
+				case ":":
+					tokens.Add(new Token(sourceSplit[0], TokenTypes.Colon));
+					sourceSplit.RemoveAt(0);
+					break;
+				case ",":
+					tokens.Add(new Token(sourceSplit[0], TokenTypes.Comma));
+					sourceSplit.RemoveAt(0);
+					break;
+				case ".":
+					tokens.Add(new Token(sourceSplit[0], TokenTypes.Dot));
 					sourceSplit.RemoveAt(0);
 					break;
 				case "+":
@@ -68,12 +88,9 @@ public class Lexer
 
 						//check keywords
 						bool isKeyword = Keywords.KeywordsDic.TryGetValue(identifier, out TokenTypes type);
-						bool isType = Types.TypesDict.ContainsKey(identifier);
 						
 						if (isKeyword || type == TokenTypes.Number)
 							tokens.Add(new Token(identifier, type));
-						else if (isType)
-							tokens.Add(new Token(identifier, TokenTypes.Type));
 						else
 							tokens.Add(new Token(identifier, TokenTypes.Identifier));
 					} else if (IsSkippable(sourceSplit[0])) {

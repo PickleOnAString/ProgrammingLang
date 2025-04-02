@@ -15,13 +15,23 @@ public enum TokenTypes
 	Equals,
 	
 	Let,
-	Type,
+	Class,
+	New,
 	
 	OpenBracket,
 	CloseBracket,
 	Semicolon,
+	Comma,
+	Colon,
+	Dot,
+	OpenCurlyBracket,
+	CloseCurlyBracket,
 	
 	BinaryOperator,
+	
+	Private,
+	Public,
+	Protected,
 	
 	EOF
 }
@@ -33,7 +43,12 @@ public static class Keywords
 	{
 		KeywordsDic = new Dictionary<string, TokenTypes>()
 		{
-			{"let", TokenTypes.Let}
+			{"let", TokenTypes.Let},
+			{"class", TokenTypes.Class},
+			{"new", TokenTypes.New},
+			{"private", TokenTypes.Private},
+			{"public", TokenTypes.Public},
+			{"protected", TokenTypes.Protected}
 		};
 	}
 }

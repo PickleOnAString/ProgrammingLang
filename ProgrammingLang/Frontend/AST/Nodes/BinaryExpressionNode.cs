@@ -13,7 +13,7 @@ public class BinaryExpressionNode(IExpression left, IExpression right, string op
 	{
 		IRuntimeValue left = Interpreter.Evaluate(Left, env);
 		IRuntimeValue right = Interpreter.Evaluate(Right, env);
-		if (left.Type == ValueType.Number && right.Type == ValueType.Number)
+		if (left.Type.Name == "Float" && right.Type.Name == "Float")
 		{
 			return EvaluateNumericBinaryExpression((NumberValue)left, (NumberValue)right, Operator);
 		}

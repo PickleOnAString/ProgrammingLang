@@ -2,18 +2,21 @@
 using ProgrammingLang.Frontend.AST.Nodes;
 using ProgrammingLang.Frontend.Parser;
 using ProgrammingLang.Runtime;
+using System.Reflection;
 using System.Text.Json;
 using Environment = ProgrammingLang.Runtime.Environment;
 Console.WriteLine("Hello World!");
 
-Parser parser = new Parser();
-ProgramNode programNode = parser.ProduceAst("Float bleh = 15; bleh * 2");
+Assembly assembly = Assembly.GetExecutingAssembly();
+string resourceName = "Testing.Main.sl";
 
-Environment env = new Environment(null);
-env.DeclareVariable("x", new NumberValue(10));
-env.DeclareVariable("true", new BoolValue(true));
-env.DeclareVariable("false", new BoolValue(false));
-env.DeclareVariable("null", new NullValue());
-
-Console.WriteLine(JsonSerializer.Serialize(((NumberValue)Interpreter.Evaluate(programNode, env)).Value));
+using (Stream stream = assembly.GetManifestResourceStream(resourceName))
+using (StreamReader reader = new StreamReader(stream))
+{
+	string result = reader.ReadToEnd();
+	Parser parser = new Parser();
+	Environment env = new Environment(ScopeType.Global);
+	ProgramNode programNode = parser.ProduceAst(result);
+	Console.WriteLine(JsonSerializer.Serialize(((NumberValue)Interpreter.Evaluate(programNode, env)).Value));
+}
 	

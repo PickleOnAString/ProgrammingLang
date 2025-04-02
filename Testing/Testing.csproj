@@ -11,4 +11,9 @@
       <ProjectReference Include="..\ProgrammingLang\ProgrammingLang.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <None Remove="Main.sl" />
+      <EmbeddedResource Include="Main.sl" />
+    </ItemGroup>
+
 </Project>
